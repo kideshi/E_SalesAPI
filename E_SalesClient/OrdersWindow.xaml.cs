@@ -25,7 +25,7 @@ namespace E_SalesClient
 
         private async void LoadOrders()
         {
-            var response = await _httpClient.GetStringAsync("api/Orders");
+            var response = await _httpClient.GetStringAsync("api/OrdersDto");
             var orders = JsonConvert.DeserializeObject<List<OrderDto>>(response);
             OrdersDataGrid.ItemsSource = orders;
         }
@@ -34,20 +34,39 @@ namespace E_SalesClient
         {
             if (OrdersDataGrid.SelectedItem is OrderDto selectedOrder)
             {
-                var response = await _httpClient.DeleteAsync($"api/Orders/{selectedOrder.OrderId}");
-                if (response.IsSuccessStatusCode)
+                // Окно подтверждения удаления
+                var result = MessageBox.Show(
+                    $"Are you sure you want to delete the order with ID {selectedOrder.OrderId}?",
+                    "Confirm Deletion",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Warning);
+
+                // Проверка на подтверждение пользователя
+                if (result == MessageBoxResult.Yes)
                 {
-                    MessageBox.Show("Order deleted successfully!");
-                    LoadOrders();
-                }
-                else
-                {
-                    MessageBox.Show("Failed to delete order.");
+                    try
+                    {
+                        var response = await _httpClient.DeleteAsync($"api/Orders/{selectedOrder.OrderId}");
+                        if (response.IsSuccessStatusCode)
+                        {
+                            MessageBox.Show("Order deleted successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                            LoadOrders();
+                        }
+                        else
+                        {
+                            var errorMessage = await response.Content.ReadAsStringAsync();
+                            MessageBox.Show($"Failed to delete order. Server response: {errorMessage}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"An error occurred: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
                 }
             }
             else
             {
-                MessageBox.Show("Please select an order to delete.");
+                MessageBox.Show("Please select an order to delete.", "Selection Error", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
@@ -90,7 +109,7 @@ namespace E_SalesClient
                     var content = new StringContent(json, Encoding.UTF8, "application/json");
 
                     // Отправляем PUT запрос
-                    var response = await _httpClient.PutAsync($"api/Orders/{selectedOrder.OrderId}", content);
+                    var response = await _httpClient.PutAsync($"api/OrdersDto/{selectedOrder.OrderId}", content);
 
                     if (response.IsSuccessStatusCode)
                     {
