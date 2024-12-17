@@ -25,9 +25,16 @@ namespace E_SalesClient
 
         private async void LoadOrders()
         {
-            var response = await _httpClient.GetStringAsync("api/OrdersDto");
-            var orders = JsonConvert.DeserializeObject<List<OrderDto>>(response);
-            OrdersDataGrid.ItemsSource = orders;
+            try
+            {
+                var response = await _httpClient.GetStringAsync("api/OrdersDto");
+                var orders = JsonConvert.DeserializeObject<List<OrderDto>>(response);
+                OrdersDataGrid.ItemsSource = orders;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error occurred while loading data. Contact administrator");
+            }
         }
 
         private async void DeleteButton_Click(object sender, RoutedEventArgs e)

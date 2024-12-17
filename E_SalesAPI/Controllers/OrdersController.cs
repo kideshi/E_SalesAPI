@@ -95,6 +95,12 @@ namespace E_SalesAPI.Controllers
         [ResponseType(typeof(void))]
         public IHttpActionResult PutOrder(int id, Order order)
         {
+            //Проверка на пустые данные
+            if (order == null)
+            {
+                return BadRequest("Information in request body is necessary");
+            }
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -134,6 +140,12 @@ namespace E_SalesAPI.Controllers
         [ResponseType(typeof(Order))]
         public IHttpActionResult PostOrder(Order order)
         {
+            //Проверка на пустые данные
+            if (order == null)
+            {
+                return BadRequest("Information in request body is necessary");
+            }
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
